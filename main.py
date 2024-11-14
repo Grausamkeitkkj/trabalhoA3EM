@@ -54,5 +54,71 @@ def executar_simulacao(dados):
     # Executa a simulação
     env.run()
 
+# Variáveis globais para armazenar as métricas - Exercicio 3
+tempos_espera = []
+tempos_servico = []
+tempos_sistema = []
+tempo_ocupado = 0  # Para calcular a taxa de utilização do servidor
+
+# Função de simulação
+def atendimento(env, tempo_de_servico, tempo_de_chegada, servidor):
+    """Simula o processo de chegada e atendimento de cada cliente."""
+    global tempo_ocupado
+
+    yield env.timeout(tempo_de_chegada)  # Tempo até a chegada do cliente
+    tempo_chegada = env.now  # Momento de chegada real do cliente
+    print(f"Cliente chegou no tempo {tempo_chegada}. Requer {tempo_de_servico} minutos de serviço.")
+
+    # Solicita o recurso e realiza o atendimento
+    with servidor.request() as req:
+        yield req
+        tempo_inicio_atendimento = env.now
+        tempos_espera.append(tempo_inicio_atendimento - tempo_chegada)
+        print(f"Cliente sendo atendido no tempo {tempo_inicio_atendimento}.")
+
+        yield env.timeout(tempo_de_servico)  # Tempo de serviço
+        tempo_ocupado += tempo_de_servico
+        tempo_saida = env.now
+        tempos_servico.append(tempo_de_servico)
+        tempos_sistema.append(tempo_saida - tempo_chegada)
+        print(f"Cliente atendido e saiu no tempo {tempo_saida}.")
+
+# Configuração da simulação
+def executar_simulacao(dados):
+    global tempo_ocupado
+
+    # Inicializa o ambiente de simulação e o recurso (servidor) com capacidade de atendimento
+    env = simpy.Environment()
+    servidor = simpy.Resource(env, capacity=1)  # Um servidor para atender clientes em fila
+
+    # Cria um processo para cada cliente com base nos dados
+    for tempo_servico, tempo_chegada in dados:
+        env.process(atendimento(env, tempo_servico, tempo_chegada, servidor))
+    
+    # Executa a simulação
+    env.run()
+
+    # Cálculo das métricas
+    total_tempo_simulacao = env.now
+    tempo_medio_espera = sum(tempos_espera) / len(tempos_espera) if tempos_espera else 0
+    tempo_medio_sistema = sum(tempos_sistema) / len(tempos_sistema) if tempos_sistema else 0
+    taxa_utilizacao_servidor = (tempo_ocupado / total_tempo_simulacao) if total_tempo_simulacao > 0 else 0
+
+    print("\nMétricas de Desempenho:")
+    print(f"Tempo Médio de Espera na Fila: {tempo_medio_espera:.2f} minutos")
+    print(f"Tempo Médio no Sistema: {tempo_medio_sistema:.2f} minutos")
+    print(f"Taxa de Utilização do Servidor: {taxa_utilizacao_servidor * 100:.2f}%")
+
+#Tempo Médio de Espera na Fila: Essa métrica é essencial para entender a experiência do cliente,
+# indicando quanto tempo, em média, os clientes esperam antes de serem atendidos. 
+# Em cenários reais, longos tempos de espera podem reduzir a satisfação do cliente.
+
+#Taxa de Utilização do Servidor: Permite avaliar o uso eficiente dos recursos. 
+# Uma taxa de utilização ideal está entre 70% e 90%;valores muito altos podem indicar 
+# necessidade de mais servidores, e valores muito baixos podem representar ociosidade.
+
+#Tempo Médio no Sistema: Esse indicador representa o tempo total que o cliente passa no sistema
+#sendo relevante para medir o impacto do tempo de espera e do tempo de serviço combinados na experiência geral do cliente.
+
 # Executar simulação
 executar_simulacao(dados)
