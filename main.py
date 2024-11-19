@@ -1,4 +1,7 @@
 import simpy
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
 
 dados = [
     (17,3), (16,6), (16,9), (20,3), (16,6), (11,4), (12,1), (20,3), (23,14), (14,6),
@@ -31,38 +34,6 @@ dados = [
 # Função de simulação
 def atendimento(env, tempo_de_servico, tempo_de_chegada, servidor):
     """Simula o processo de chegada e atendimento de cada cliente."""
-    yield env.timeout(tempo_de_chegada)  # Tempo até a chegada do cliente
-    print(f"Cliente chegou no tempo {env.now}. Requer {tempo_de_servico} minutos de serviço.")
-
-    # Solicita o recurso e realiza o atendimento
-    with servidor.request() as req:
-        yield req
-        print(f"Cliente sendo atendido no tempo {env.now}.")
-        yield env.timeout(tempo_de_servico)  # Tempo de serviço
-        print(f"Cliente atendido e saiu no tempo {env.now}.")
-
-# Configuração da simulação
-def executar_simulacao(dados):
-    # Inicializa o ambiente de simulação e o recurso (servidor) com capacidade de atendimento
-    env = simpy.Environment()
-    servidor = simpy.Resource(env, capacity=1)  # Um servidor para atender clientes em fila
-
-    # Cria um processo para cada cliente com base nos dados
-    for tempo_servico, tempo_chegada in dados:
-        env.process(atendimento(env, tempo_servico, tempo_chegada, servidor))
-    
-    # Executa a simulação
-    env.run()
-
-# Variáveis globais para armazenar as métricas - Exercicio 3
-tempos_espera = []
-tempos_servico = []
-tempos_sistema = []
-tempo_ocupado = 0  # Para calcular a taxa de utilização do servidor
-
-# Função de simulação
-def atendimento(env, tempo_de_servico, tempo_de_chegada, servidor):
-    """Simula o processo de chegada e atendimento de cada cliente."""
     global tempo_ocupado
 
     yield env.timeout(tempo_de_chegada)  # Tempo até a chegada do cliente
@@ -89,7 +60,7 @@ def executar_simulacao(dados):
 
     # Inicializa o ambiente de simulação e o recurso (servidor) com capacidade de atendimento
     env = simpy.Environment()
-    servidor = simpy.Resource(env, capacity=1)  # Um servidor para atender clientes em fila
+    servidor = simpy.Resource(env, capacity=3)  # Um servidor para atender clientes em fila
 
     # Cria um processo para cada cliente com base nos dados
     for tempo_servico, tempo_chegada in dados:
@@ -109,16 +80,49 @@ def executar_simulacao(dados):
     print(f"Tempo Médio no Sistema: {tempo_medio_sistema:.2f} minutos")
     print(f"Taxa de Utilização do Servidor: {taxa_utilizacao_servidor * 100:.2f}%")
 
-#Tempo Médio de Espera na Fila: Essa métrica é essencial para entender a experiência do cliente,
-# indicando quanto tempo, em média, os clientes esperam antes de serem atendidos. 
-# Em cenários reais, longos tempos de espera podem reduzir a satisfação do cliente.
+    # Gerar gráficos
+    gerar_graficos(tempos_espera, tempos_servico, tempos_sistema, taxa_utilizacao_servidor)
 
-#Taxa de Utilização do Servidor: Permite avaliar o uso eficiente dos recursos. 
-# Uma taxa de utilização ideal está entre 70% e 90%;valores muito altos podem indicar 
-# necessidade de mais servidores, e valores muito baixos podem representar ociosidade.
+# Função para gerar gráficos
+def gerar_graficos(tempos_espera, tempos_servico, tempos_sistema, taxa_utilizacao_servidor):
+    plt.figure(figsize=(15, 10))
 
-#Tempo Médio no Sistema: Esse indicador representa o tempo total que o cliente passa no sistema
-#sendo relevante para medir o impacto do tempo de espera e do tempo de serviço combinados na experiência geral do cliente.
+    # Histograma dos tempos de espera
+    plt.subplot(2, 2, 1)
+    plt.hist(tempos_espera, bins=20, color='blue', edgecolor='black')
+    plt.title('Histograma dos Tempos de Espera')
+    plt.xlabel('Tempo de Espera (minutos)')
+    plt.ylabel('Frequência')
+
+    # Histograma dos tempos de serviço
+    plt.subplot(2, 2, 2)
+    plt.hist(tempos_servico, bins=20, color='green', edgecolor='black')
+    plt.title('Histograma dos Tempos de Serviço')
+    plt.xlabel('Tempo de Serviço (minutos)')
+    plt.ylabel('Frequência')
+
+    # Histograma dos tempos no sistema
+    plt.subplot(2, 2, 3)
+    plt.hist(tempos_sistema, bins=20, color='red', edgecolor='black')
+    plt.title('Histograma dos Tempos no Sistema')
+    plt.xlabel('Tempo no Sistema (minutos)')
+    plt.ylabel('Frequência')
+
+    # Gráfico de linha da taxa de utilização do servidor
+    plt.subplot(2, 2, 4)
+    plt.plot(range(len(tempos_servico)), [taxa_utilizacao_servidor] * len(tempos_servico), color='purple')
+    plt.title('Taxa de Utilização do Servidor')
+    plt.xlabel('Tempo')
+    plt.ylabel('Taxa de Utilização (%)')
+
+    plt.tight_layout()
+    plt.show()
+
+# Variáveis globais para armazenar as métricas
+tempos_espera = []
+tempos_servico = []
+tempos_sistema = []
+tempo_ocupado = 0  # Para calcular a taxa de utilização do servidor
 
 # Executar simulação
 executar_simulacao(dados)
