@@ -126,3 +126,11 @@ tempo_ocupado = 0  # Para calcular a taxa de utilização do servidor
 
 # Executar simulação
 executar_simulacao(dados)
+
+# Transformar os dados em um DataFrame
+df = pd.DataFrame(dados, columns=["Tempo de Serviço", "Tempo de Chegada"])
+
+# Calcular a matriz de correlação
+correlacao = df.corr()
+print("\nMatriz de Correlação:")
+print(correlacao)
