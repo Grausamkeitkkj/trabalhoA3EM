@@ -1,4 +1,5 @@
 import simpy
+import pandas as pd
 
 dados = [
     (17,3), (16,6), (16,9), (20,3), (16,6), (11,4), (12,1), (20,3), (23,14), (14,6),
@@ -122,3 +123,11 @@ def executar_simulacao(dados):
 
 # Executar simulação
 executar_simulacao(dados)
+
+# Transformar os dados em um DataFrame
+df = pd.DataFrame(dados, columns=["Tempo de Serviço", "Tempo de Chegada"])
+
+# Calcular a matriz de correlação
+correlacao = df.corr()
+print("\nMatriz de Correlação:")
+print(correlacao)
