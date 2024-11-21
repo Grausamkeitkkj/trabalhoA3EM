@@ -134,3 +134,47 @@ df = pd.DataFrame(dados, columns=["Tempo de Serviço", "Tempo de Chegada"])
 correlacao = df.corr()
 print("\nMatriz de Correlação:")
 print(correlacao)
+
+# Identificar outliers para um conjunto de dados
+def calcular_outliers(dados, coluna):
+    Q1 = np.percentile(dados[coluna], 25)  # Primeiro quartil
+    Q3 = np.percentile(dados[coluna], 75)  # Terceiro quartil
+    IQR = Q3 - Q1  # Intervalo interquartil
+
+    limite_inferior = Q1 - 1.5 * IQR
+    limite_superior = Q3 + 1.5 * IQR
+
+    # Identificar outliers
+    outliers = dados[(dados[coluna] < limite_inferior) | (dados[coluna] > limite_superior)]
+    return outliers, limite_inferior, limite_superior
+
+# Cria DataFrame com os dados
+df = pd.DataFrame(dados, columns=["Tempo de Serviço", "Tempo de Chegada"])
+
+# Calcula outliers para "Tempo de Serviço"
+outliers_servico, limite_inf_servico, limite_sup_servico = calcular_outliers(df, "Tempo de Serviço")
+print(f"Outliers em 'Tempo de Serviço':\n{outliers_servico}")
+
+# Calcula outliers para "Tempo de Chegada"
+outliers_chegada, limite_inf_chegada, limite_sup_chegada = calcular_outliers(df, "Tempo de Chegada")
+print(f"Outliers em 'Tempo de Chegada':\n{outliers_chegada}")
+
+print("\nLimites para 'Tempo de Chegada':")
+print(f"Limite Inferior: {limite_inf_chegada}, Limite Superior: {limite_sup_chegada}")
+
+
+plt.figure(figsize=(10, 7))
+
+# Destaca outliers em vermelho
+cores = ['red' if (row["Tempo de Serviço"] < limite_inf_servico or
+                   row["Tempo de Serviço"] > limite_sup_servico or
+                   row["Tempo de Chegada"] < limite_inf_chegada or
+                   row["Tempo de Chegada"] > limite_sup_chegada)
+         else 'blue' for _, row in df.iterrows()]
+
+plt.scatter(df["Tempo de Chegada"], df["Tempo de Serviço"], c=cores, alpha=0.7, edgecolor='black')
+plt.title("Dispersão: Tempo de Chegada x Tempo de Serviço")
+plt.xlabel("Tempo de Chegada (minutos)")
+plt.ylabel("Tempo de Serviço (minutos)")
+plt.grid(True)
+plt.show()
