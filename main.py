@@ -38,7 +38,7 @@ def atendimento(env, tempo_de_servico, tempo_de_chegada, servidor):
 
     yield env.timeout(tempo_de_chegada)  # Tempo até a chegada do cliente
     tempo_chegada = env.now  # Momento de chegada real do cliente
-    print(f"Cliente chegou no tempo {tempo_chegada}. Requer {tempo_de_servico} minutos de serviço.")
+    print(f"\nCliente chegou no tempo {tempo_chegada}. Requer {tempo_de_servico} minutos de serviço.")
 
     # Solicita o recurso e realiza o atendimento
     with servidor.request() as req:
@@ -60,7 +60,8 @@ def executar_simulacao(dados):
 
     # Inicializa o ambiente de simulação e o recurso (servidor) com capacidade de atendimento
     env = simpy.Environment()
-    servidor = simpy.Resource(env, capacity=3)  # Um servidor para atender clientes em fila
+    capacidade_servidor = 28
+    servidor = simpy.Resource(env, capacity=capacidade_servidor)  # Um servidor para atender clientes em fila
 
     # Cria um processo para cada cliente com base nos dados
     for tempo_servico, tempo_chegada in dados:
@@ -73,7 +74,7 @@ def executar_simulacao(dados):
     total_tempo_simulacao = env.now
     tempo_medio_espera = sum(tempos_espera) / len(tempos_espera) if tempos_espera else 0
     tempo_medio_sistema = sum(tempos_sistema) / len(tempos_sistema) if tempos_sistema else 0
-    taxa_utilizacao_servidor = (tempo_ocupado / total_tempo_simulacao) if total_tempo_simulacao > 0 else 0
+    taxa_utilizacao_servidor = (tempo_ocupado / (total_tempo_simulacao * capacidade_servidor)) if total_tempo_simulacao > 0 else 0
 
     print("\nMétricas de Desempenho:")
     print(f"Tempo Médio de Espera na Fila: {tempo_medio_espera:.2f} minutos")
@@ -153,7 +154,7 @@ df = pd.DataFrame(dados, columns=["Tempo de Serviço", "Tempo de Chegada"])
 
 # Calcula outliers para "Tempo de Serviço"
 outliers_servico, limite_inf_servico, limite_sup_servico = calcular_outliers(df, "Tempo de Serviço")
-print(f"Outliers em 'Tempo de Serviço':\n{outliers_servico}")
+print(f"\nOutliers em 'Tempo de Serviço':\n{outliers_servico}")
 
 # Calcula outliers para "Tempo de Chegada"
 outliers_chegada, limite_inf_chegada, limite_sup_chegada = calcular_outliers(df, "Tempo de Chegada")
