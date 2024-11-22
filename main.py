@@ -167,6 +167,12 @@ print(f"Outliers em 'Tempo de Chegada':\n{outliers_chegada}")
 print("\nLimites para 'Tempo de Chegada':")
 print(f"Limite Inferior: {limite_inf_chegada}, Limite Superior: {limite_sup_chegada}")
 
+# Calcular tempo médio de chegada e tempo médio de serviço
+tempo_medio_chegada = df["Tempo de Chegada"].mean()
+tempo_medio_servico = df["Tempo de Serviço"].mean()
+
+print(f"\nTempo Médio de Chegada: {tempo_medio_chegada:.2f} minutos")
+print(f"Tempo Médio de Serviço: {tempo_medio_servico:.2f} minutos")
 
 plt.figure(figsize=(10, 7))
 
