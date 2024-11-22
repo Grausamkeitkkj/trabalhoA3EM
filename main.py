@@ -158,11 +158,17 @@ df = pd.DataFrame(dados, columns=["Tempo de Serviço", "Tempo de Chegada"])
 
 # Calcula outliers para "Tempo de Serviço"
 outliers_servico, limite_inf_servico, limite_sup_servico = calcular_outliers(df, "Tempo de Serviço")
-print(f"\nOutliers em 'Tempo de Serviço':\n{outliers_servico}")
+if outliers_servico.empty:
+    print("\nOutliers em 'Tempo de Serviço': sem outliers")
+else:
+    print(f"\nOutliers em 'Tempo de Serviço':\n{outliers_servico}")
 
 # Calcula outliers para "Tempo de Chegada"
 outliers_chegada, limite_inf_chegada, limite_sup_chegada = calcular_outliers(df, "Tempo de Chegada")
-print(f"Outliers em 'Tempo de Chegada':\n{outliers_chegada}")
+if outliers_chegada.empty:
+    print("Outliers em 'Tempo de Chegada': sem outliers")
+else:
+    print(f"Outliers em 'Tempo de Chegada':\n{outliers_chegada}")
 
 print("\nLimites para 'Tempo de Chegada':")
 print(f"Limite Inferior: {limite_inf_chegada}, Limite Superior: {limite_sup_chegada}")
