@@ -31,14 +31,14 @@ dados = [
     (20,2), (23,6), (23,0), (16,5), (23,5), (10,4), (18,3), (19,4), (17,2), (11,1)
 ]
 
-# Variáveis globais para armazenar as métricas
+# Variáveis globais para armazenar as metricas
 tempos_espera = []
 tempos_servico = []
 tempos_sistema = []
-tempo_ocupado = 0  # Para calcular a taxa de utilização do servidor
+tempo_ocupado = 0  # Para calcular a taxa de utilizacão do servidor
 contador_cliente = 0  # Contador para numerar os clientes
 
-# Função de simulação
+# Funcão de simulacão
 def atendimento(env, tempo_de_servico, tempo_de_chegada, servidor):
     """Simula o processo de chegada e atendimento de cada cliente."""
     global tempo_ocupado, contador_cliente
@@ -46,9 +46,9 @@ def atendimento(env, tempo_de_servico, tempo_de_chegada, servidor):
     contador_cliente += 1  # Incrementa o contador de clientes
     numero_cliente = contador_cliente  # Armazena o número do cliente atual
 
-    yield env.timeout(tempo_de_chegada)  # Tempo até a chegada do cliente
+    yield env.timeout(tempo_de_chegada)  # Tempo ate a chegada do cliente
     tempo_chegada = env.now  # Momento de chegada real do cliente
-    print(f"\nCliente {numero_cliente} chegou no tempo {tempo_chegada}. Requer {tempo_de_servico} minutos de serviço.")
+    print(f"\nCliente {numero_cliente} chegou no tempo {tempo_chegada}. Requer {tempo_de_servico} minutos de servico.")
 
     # Solicita o recurso e realiza o atendimento
     with servidor.request() as req:
@@ -57,18 +57,18 @@ def atendimento(env, tempo_de_servico, tempo_de_chegada, servidor):
         tempos_espera.append(tempo_inicio_atendimento - tempo_chegada)
         print(f"Cliente {numero_cliente} sendo atendido no tempo {tempo_inicio_atendimento}.")
 
-        yield env.timeout(tempo_de_servico)  # Tempo de serviço
+        yield env.timeout(tempo_de_servico)  # Tempo de servico
         tempo_ocupado += tempo_de_servico
         tempo_saida = env.now
         tempos_servico.append(tempo_de_servico)
         tempos_sistema.append(tempo_saida - tempo_chegada)
         print(f"Cliente {numero_cliente} atendido e saiu no tempo {tempo_saida}.")
 
-# Configuração da simulação
+# Configuracão da simulacão
 def executar_simulacao(dados):
     global tempo_ocupado
 
-    # Inicializa o ambiente de simulação e o recurso (servidor) com capacidade de atendimento
+    # Inicializa o ambiente de simulacão e o recurso (servidor) com capacidade de atendimento
     env = simpy.Environment()
     capacidade_servidor = 28
     servidor = simpy.Resource(env, capacity=capacidade_servidor)  # Um servidor para atender clientes em fila
@@ -77,24 +77,24 @@ def executar_simulacao(dados):
     for tempo_servico, tempo_chegada in dados:
         env.process(atendimento(env, tempo_servico, tempo_chegada, servidor))
     
-    # Executa a simulação
+    # Executa a simulacão
     env.run()
 
-    # Cálculo das métricas
+    # Cálculo das metricas
     total_tempo_simulacao = env.now
     tempo_medio_espera = sum(tempos_espera) / len(tempos_espera) if tempos_espera else 0
     tempo_medio_sistema = sum(tempos_sistema) / len(tempos_sistema) if tempos_sistema else 0
     taxa_utilizacao_servidor = (tempo_ocupado / (total_tempo_simulacao * capacidade_servidor)) if total_tempo_simulacao > 0 else 0
 
-    print("\nMétricas de Desempenho:")
-    print(f"Tempo Médio de Espera na Fila: {tempo_medio_espera:.2f} minutos")
-    print(f"Tempo Médio no Sistema: {tempo_medio_sistema:.2f} minutos")
-    print(f"Taxa de Utilização do Servidor: {taxa_utilizacao_servidor * 100:.2f}%")
+    print("\nMetricas de Desempenho:")
+    print(f"Tempo Medio de Espera na Fila: {tempo_medio_espera:.2f} minutos")
+    print(f"Tempo Medio no Sistema: {tempo_medio_sistema:.2f} minutos")
+    print(f"Taxa de Utilizacao do Servidor: {taxa_utilizacao_servidor * 100:.2f}%")
 
     # Gerar gráficos
     gerar_graficos(tempos_espera, tempos_servico, tempos_sistema, taxa_utilizacao_servidor)
 
-# Função para gerar gráficos
+# Funcão para gerar gráficos
 def gerar_graficos(tempos_espera, tempos_servico, tempos_sistema, taxa_utilizacao_servidor):
     plt.figure(figsize=(15, 10))
 
@@ -105,11 +105,11 @@ def gerar_graficos(tempos_espera, tempos_servico, tempos_sistema, taxa_utilizaca
     plt.xlabel('Tempo de Espera (minutos)')
     plt.ylabel('Frequência')
 
-    # Histograma dos tempos de serviço
+    # Histograma dos tempos de servico
     plt.subplot(2, 2, 2)
     plt.hist(tempos_servico, bins=20, color='green', edgecolor='black')
-    plt.title('Histograma dos Tempos de Serviço')
-    plt.xlabel('Tempo de Serviço (minutos)')
+    plt.title('Histograma dos Tempos de Servico')
+    plt.xlabel('Tempo de Servico (minutos)')
     plt.ylabel('Frequência')
 
     # Histograma dos tempos no sistema
@@ -119,25 +119,25 @@ def gerar_graficos(tempos_espera, tempos_servico, tempos_sistema, taxa_utilizaca
     plt.xlabel('Tempo no Sistema (minutos)')
     plt.ylabel('Frequência')
 
-    # Gráfico de linha da taxa de utilização do servidor
+    # Gráfico de linha da taxa de utilizacão do servidor
     plt.subplot(2, 2, 4)
     plt.plot(range(len(tempos_servico)), [taxa_utilizacao_servidor] * len(tempos_servico), color='purple')
-    plt.title('Taxa de Utilização do Servidor')
+    plt.title('Taxa de Utilizacão do Servidor')
     plt.xlabel('Tempo')
-    plt.ylabel('Taxa de Utilização (%)')
+    plt.ylabel('Taxa de Utilizacão (%)')
 
     plt.tight_layout()
     plt.show()
 
-# Executar simulação
+# Executar simulacão
 executar_simulacao(dados)
 
 # Transformar os dados em um DataFrame
-df = pd.DataFrame(dados, columns=["Tempo de Serviço", "Tempo de Chegada"])
+df = pd.DataFrame(dados, columns=["Tempo de Servico", "Tempo de Chegada"])
 
-# Calcular a matriz de correlação
+# Calcular a matriz de correlacão
 correlacao = df.corr()
-print("\nMatriz de Correlação:")
+print("\nMatriz de Correlacao:")
 print(correlacao)
 
 # Identificar outliers para um conjunto de dados
@@ -154,14 +154,14 @@ def calcular_outliers(dados, coluna):
     return outliers, limite_inferior, limite_superior
 
 # Cria DataFrame com os dados
-df = pd.DataFrame(dados, columns=["Tempo de Serviço", "Tempo de Chegada"])
+df = pd.DataFrame(dados, columns=["Tempo de Servico", "Tempo de Chegada"])
 
-# Calcula outliers para "Tempo de Serviço"
-outliers_servico, limite_inf_servico, limite_sup_servico = calcular_outliers(df, "Tempo de Serviço")
+# Calcula outliers para "Tempo de Servico"
+outliers_servico, limite_inf_servico, limite_sup_servico = calcular_outliers(df, "Tempo de Servico")
 if outliers_servico.empty:
-    print("\nOutliers em 'Tempo de Serviço': sem outliers")
+    print("\nOutliers em 'Tempo de Servico': sem outliers")
 else:
-    print(f"\nOutliers em 'Tempo de Serviço':\n{outliers_servico}")
+    print(f"\nOutliers em 'Tempo de Servico':\n{outliers_servico}")
 
 # Calcula outliers para "Tempo de Chegada"
 outliers_chegada, limite_inf_chegada, limite_sup_chegada = calcular_outliers(df, "Tempo de Chegada")
@@ -173,25 +173,25 @@ else:
 print("\nLimites para 'Tempo de Chegada':")
 print(f"Limite Inferior: {limite_inf_chegada}, Limite Superior: {limite_sup_chegada}")
 
-# Calcular tempo médio de chegada e tempo médio de serviço
+# Calcular tempo medio de chegada e tempo medio de servico
 tempo_medio_chegada = df["Tempo de Chegada"].mean()
-tempo_medio_servico = df["Tempo de Serviço"].mean()
+tempo_medio_servico = df["Tempo de Servico"].mean()
 
-print(f"\nTempo Médio de Chegada: {tempo_medio_chegada:.2f} minutos")
-print(f"Tempo Médio de Serviço: {tempo_medio_servico:.2f} minutos")
+print(f"\nTempo Medio de Chegada: {tempo_medio_chegada:.2f} minutos")
+print(f"Tempo Medio de Servico: {tempo_medio_servico:.2f} minutos")
 
 plt.figure(figsize=(10, 7))
 
 # Destaca outliers em vermelho
-cores = ['red' if (row["Tempo de Serviço"] < limite_inf_servico or
-                   row["Tempo de Serviço"] > limite_sup_servico or
+cores = ['red' if (row["Tempo de Servico"] < limite_inf_servico or
+                   row["Tempo de Servico"] > limite_sup_servico or
                    row["Tempo de Chegada"] < limite_inf_chegada or
                    row["Tempo de Chegada"] > limite_sup_chegada)
          else 'blue' for _, row in df.iterrows()]
 
-plt.scatter(df["Tempo de Chegada"], df["Tempo de Serviço"], c=cores, alpha=0.7, edgecolor='black')
-plt.title("Dispersão: Tempo de Chegada x Tempo de Serviço")
+plt.scatter(df["Tempo de Chegada"], df["Tempo de Servico"], c=cores, alpha=0.7, edgecolor='black')
+plt.title("Dispersão: Tempo de Chegada x Tempo de Servico")
 plt.xlabel("Tempo de Chegada (minutos)")
-plt.ylabel("Tempo de Serviço (minutos)")
+plt.ylabel("Tempo de Servico (minutos)")
 plt.grid(True)
 plt.show()
